@@ -2,6 +2,7 @@
 #define HELPER_H
 
 void benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl);
+void benchmarkd(void (*function)(int*, int, int), int* tab, int nb, int printcsl);
 void afficheTableau(int* tab, int tabSize);
 int* randTab(int nb, int maxValue);
 

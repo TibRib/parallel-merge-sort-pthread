@@ -24,6 +24,17 @@ void benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
     printf("function took %f seconds\n", (endTime - startTime));
 }
 
+void benchmarkd(void (*function)(int*, int, int), int* tab, int nb, int printcsl){
+    if(printcsl)
+        afficheTableau(tab, nb);
+    float startTime = (float) clock()/CLOCKS_PER_SEC;
+    function(tab, 0, nb);
+    float endTime = (float) clock()/CLOCKS_PER_SEC;
+    if(printcsl)
+        afficheTableau(tab, nb);
+    printf("function took %f seconds\n", (endTime - startTime));
+}
+
 int* randTab(int nb, int maxValue){
     srand(time(NULL));
 

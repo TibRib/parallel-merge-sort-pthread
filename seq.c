@@ -12,8 +12,8 @@ Version séquentielle du tri
  **/
 
 /* Prototypes de fonctions */
-void fusion(int* U, int n, int* V, int m, int* T);
 void triFusion(int* T, int n);
+void triFusion2(int* Tab, int start, int end);
 void triInsertion(int* tab, int nbElements);
 
 int main(int argc, char* argv[]){ 
@@ -53,6 +53,7 @@ int main(int argc, char* argv[]){
             benchmark(triInsertion, fArray, tailleTableau, printArg);
         } else if(strcmp(tri,"fusion") == 0){
             benchmark(triFusion, fArray, tailleTableau, printArg);
+            //benchmarkd(triFusion2, fArray, tailleTableau, printArg);
         } else{
             puts("Entrer un type de tri valide : insert   ou   fusion");
         }
@@ -62,37 +63,13 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void triFusion(int* T, int n){
-
-    printf("Travail sur : ");
-    afficheTableau(T,n);
-    
-    //Si n est petit, tri insertion
-    if(n <= 1){
-        return;
+void afficheSection(int* arr, int start, int end){
+    printf("[");
+    for(int i=start; i<end-1; i++){
+        printf(" %d,",arr[i]);
     }
-    /*
-    if(n < 3){
-        triInsertion(T, n);
-    } */
-    
-
-    //Allocations <-
-    int nb2 = n/2;
-
-//[1 2 3 4 5]
-//U = [ 1 2 3 ] (nb = 3)   index = 0,   nb = 3 = nb2 + ((n%2!=0)?1:0))
-//V = [ 4 5]  (nb = 2) index = nb2 + ((n%2!=0)?1:0) nb = nb2
-
-    int *U = copySection(T,0,nb2 + n%2 );
-    int *V = copySection(T, nb2 + 1 + n%2, nb2);
-
-    triFusion(U, nb2 + n%2);
-    triFusion(V, nb2); //ICI
-    
-    fusion(U, nb2, V, nb2, T);
-
-    //TODO : free
+    printf(" %d",arr[end-1]);
+    printf("]\n (%d elements)\n\n", end-start);
 }
 
 
@@ -100,12 +77,6 @@ void fusion(int* U, int n, int* V, int m, int* T){
     int i,j;
     i = 0;
     j = 0;
-
-    #define MAXINT 2147483647
-
-    // ???
-    //U[n] = MAXINT; //ça va péter
-    //V[m] = MAXINT; //là aussi
 
     int nbElements = m+n;
     for(int k=0; k <= nbElements; k++){
@@ -117,6 +88,29 @@ void fusion(int* U, int n, int* V, int m, int* T){
         }
     }
 }
+
+void triFusion(int* T, int n){
+    if(n < 2){
+        return;
+    }
+    
+    printf("Travail sur (n=%d) : ",n);
+    afficheTableau(T, n);
+
+    int mid = n/2;
+
+    int* U = copySection(T, 0, mid);
+    int usize = mid;
+    triFusion(U, usize);
+    
+
+    int* V = copySection(T, mid, (n-mid));
+    int vsize = n-mid;
+    triFusion(V, vsize);
+    
+    //fusion(U,usize,V,vsize, T);
+}
+
 
 //Ok - validé
 void triInsertion(int* tab, int nbElements){
