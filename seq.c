@@ -3,6 +3,7 @@
 
 #include "helper.h"
 #include <string.h>
+#include <limits.h>
 
 /** Devoir 1 
 - Maxence Decourriere
@@ -13,7 +14,6 @@ Version séquentielle du tri
 
 /* Prototypes de fonctions */
 void triFusion(int* T, int n);
-void triFusion2(int* Tab, int start, int end);
 void triInsertion(int* tab, int nbElements);
 
 int main(int argc, char* argv[]){ 
@@ -53,7 +53,6 @@ int main(int argc, char* argv[]){
             benchmark(triInsertion, fArray, tailleTableau, printArg);
         } else if(strcmp(tri,"fusion") == 0){
             benchmark(triFusion, fArray, tailleTableau, printArg);
-            //benchmarkd(triFusion2, fArray, tailleTableau, printArg);
         } else{
             puts("Entrer un type de tri valide : insert   ou   fusion");
         }
@@ -79,36 +78,37 @@ void fusion(int* U, int n, int* V, int m, int* T){
     j = 0;
 
     int nbElements = m+n;
-    for(int k=0; k <= nbElements; k++){
+
+    U[n+1] = INT_MAX;
+    V[n+1] = INT_MAX;
+
+    for(int k=0; k < nbElements; k++){
         if(U[i] < V[j]){
-            T[k] = U[i++];
+            T[k] = U[i++]; 
         }
         else{
             T[k] = V[j++];
         }
+
     }
 }
 
+//Ok validé
 void triFusion(int* T, int n){
     if(n < 2){
         return;
     }
-    
-    printf("Travail sur (n=%d) : ",n);
-    afficheTableau(T, n);
-
     int mid = n/2;
 
-    int* U = copySection(T, 0, mid);
     int usize = mid;
+    int* U = copySection(T, 0, usize+1); //Copie sur n+1 éléments pour permettre affectation de fonction Fusion
     triFusion(U, usize);
-    
 
-    int* V = copySection(T, mid, (n-mid));
     int vsize = n-mid;
+    int* V = copySection(T, mid, vsize+1); //Copie sur m+1 éléments pour permettre affectation de fonction Fusion
     triFusion(V, vsize);
     
-    //fusion(U,usize,V,vsize, T);
+    fusion(U,usize,V,vsize, T);
 }
 
 
