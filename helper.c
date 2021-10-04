@@ -6,7 +6,8 @@
 
 void afficheTableau(int* tab, int tabSize){
     printf("[");
-    for(int i=0; i<tabSize-1; i++){
+    int i;
+    for(i=0; i<tabSize-1; i++){
         printf(" %d,",tab[i]);
     }
     printf(" %d",tab[tabSize-1]);
@@ -19,11 +20,12 @@ void afficheTableau10(int* tab, int tabSize){
     }
 
     printf("[");
-    for(int i=0; i<10; i++){
+    int i;
+    for(i=0; i<10; i++){
         printf(" %d,",tab[i]);
     }
     printf(" ...,");
-    for(int i=tabSize-10; i<tabSize-1; i++){
+    for(i=tabSize-10; i<tabSize-1; i++){
         printf(" %d,",tab[i]);
     }
     printf(" %d",tab[tabSize-1]);
@@ -45,7 +47,8 @@ int* randTab(int nb, int maxValue){
     srand(time(NULL));
 
     int *tab = (int*) malloc(sizeof(int) * nb);
-    for(int k = 0; k<nb; k++)
+    int k;
+    for(k = 0; k<nb; k++)
         tab[k] = rand() % maxValue;
 
     return tab;
@@ -57,7 +60,8 @@ int *alloueTableau(int nbElements){
 
 int* copySection(int* tableau, int startIndex, int nb){
     int* tab = alloueTableau(nb);
-    for(int i=0; i<nb; i++){
+    int i;
+    for(i=0; i<nb; i++){
         tab[i] = tableau[startIndex + i];
     }
     return tab;
@@ -79,19 +83,19 @@ int* loadArrayFromFile(char* filename, int* nbElements){
         printf("Could not read the file '%s'\n",filename);
         return NULL;
     }
-    //Determine the number of bytes taken by the bin file
+    /*Determine the number of bytes taken by the bin file */
 
     fseek(f, 0L, SEEK_END);
     int tabSize = ftell(f);
     rewind(f);
 
-    //Deduct the number of ints registered
+    /* Deduct the number of ints registered */
     int nbEntiers = tabSize / sizeof(int);
     *nbElements = nbEntiers;
-    //allocate a new array
+    /* allocate a new array */
     int *array = (int*) malloc(tabSize);
 
-    //read the values and fill the array
+    /* read the values and fill the array */
     fread(array, sizeof(int), nbEntiers, f);
 
     fclose(f);

@@ -19,27 +19,30 @@ void triFusion(int* T, int n);
 void triInsertion(int* tab, int nbElements);
 
 int main(int argc, char* argv[]){ 
+    int tailleTableau;
+    int nbElements;
+    char* filename;
+    int* fArray;
+
     if(argc < 3 ){
         puts("Utilisation : fusion/insert <nom de fichier> (-p (optionnel : print to console))");
         puts("Autre possibilite : utiliser l'argument gen <nb_elements> <nom_fichier>\n");
         exit(1);
     }
-    
-    int tailleTableau;
 
     if(strcmp(argv[1],"gen") == 0){
         if(argc != 4){
               puts("Entrez un nom de fichier valide.\n ex: ./seq gen 376 nom_fichier.bin\n");
             return(1);
         }
-        int nbElements = atoi(argv[2]);
+        nbElements = atoi(argv[2]);
         if(nbElements < 1){
             puts("Entrez un nombre d'elements valide.\n ex: ./seq gen 376 tab_376.bin\n");
             return(1);
         }
         
-        char* filename = argv[3];
-        int* fArray = randTab(nbElements, 10000);
+        filename = argv[3];
+        fArray = randTab(nbElements, 10000);
         writeArrayToFile(filename, fArray, nbElements);
         printf("Tableau enregistré dans le fichier '%s'\n",filename);
         free(fArray);
@@ -74,7 +77,8 @@ void fusion(int* U, int n, int* V, int m, int* T){
     U[n+1] = INT_MAX;
     V[n+1] = INT_MAX;
 
-    for(int k=0; k < nbElements; k++){
+    int k;
+    for(k=0; k < nbElements; k++){
         if(U[i] < V[j]){
             T[k] = U[i++]; 
         }
@@ -85,7 +89,6 @@ void fusion(int* U, int n, int* V, int m, int* T){
     }
 }
 
-//Ok validé
 void triFusion(int* T, int n){
     if(n < 2){
         return;
@@ -97,18 +100,17 @@ void triFusion(int* T, int n){
     int mid = n/2;
 
     int usize = mid;
-    int* U = copySection(T, 0, usize+1); //Copie sur n+1 éléments pour permettre affectation de fonction Fusion
+    int* U = copySection(T, 0, usize+1); /* Copie sur n+1 éléments pour permettre affectation de fonction Fusion */
     triFusion(U, usize);
 
     int vsize = n-mid;
-    int* V = copySection(T, mid, vsize+1); //Copie sur m+1 éléments pour permettre affectation de fonction Fusion
+    int* V = copySection(T, mid, vsize+1); /* Copie sur m+1 éléments pour permettre affectation de fonction Fusion */
     triFusion(V, vsize);
     
     fusion(U,usize,V,vsize, T);
 }
 
 
-//Ok - validé
 void triInsertion(int* tab, int nbElements){
     int i, j, clef;
     for(j=1; j<nbElements; j++){
