@@ -12,6 +12,8 @@
 Version séquentielle du tri
  **/
 
+#define SEUIL 100
+
 /* Prototypes de fonctions */
 void triFusion(int* T, int n);
 void triInsertion(int* tab, int nbElements);
@@ -88,6 +90,10 @@ void triFusion(int* T, int n){
     if(n < 2){
         return;
     }
+    else if(n < SEUIL){
+        return triInsertion(T,n);
+    }
+    
     int mid = n/2;
 
     int usize = mid;
