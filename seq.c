@@ -12,11 +12,13 @@
 Version séquentielle du tri
  **/
 
-#define SEUIL 100
+#define SEUIL 150
 
 /* Prototypes de fonctions */
 void triFusion(int* T, int n);
 void triInsertion(int* tab, int nbElements);
+
+//void thresholdFusionToInsert(int nb, int printcsl);
 
 int main(int argc, char* argv[]){ 
     int tailleTableau;
@@ -58,7 +60,9 @@ int main(int argc, char* argv[]){
             benchmark(triInsertion, fArray, tailleTableau, printArg);
         } else if(strcmp(tri,"fusion") == 0){
             benchmark(triFusion, fArray, tailleTableau, printArg);
-        } else{
+        } /* else if(strcmp(tri,"threshold") == 0){
+            thresholdFusionToInsert(tailleTableau, printArg);
+        } */ else{
             puts("Entrer un type de tri valide : insert   ou   fusion");
         }
         free(fArray);
@@ -124,3 +128,22 @@ void triInsertion(int* tab, int nbElements){
     }
     return;
 }
+
+/*
+void thresholdFusionToInsert( int nb, int printcsl){
+    int nbIteration = 0;
+    double benchInsert;
+    double benchFusion;
+    int* tab;
+
+    do{
+        nbIteration++;
+        tab = randTab(nbIteration, 10000);
+        benchInsert = benchmark(triInsertion, tab, nbIteration, printcsl);
+        benchFusion = benchmark(triFusion, tab, nbIteration, printcsl);
+        free(tab);
+    
+    }while( ( (fabs(benchInsert - benchFusion) / ( (benchInsert - benchFusion)/2.0 )) * 100) > (float)nb );
+    printf("%d elements",nbIteration);
+}
+*/
