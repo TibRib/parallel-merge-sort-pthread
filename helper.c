@@ -44,10 +44,10 @@ void benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
 }
 
 int* randTab(int nb, int maxValue){
-    srand(time(NULL));
-
-    int *tab = (int*) malloc(sizeof(int) * nb);
+    int *tab;
     int k;
+    srand(time(NULL));
+    tab = (int*) malloc(sizeof(int) * nb);
     for(k = 0; k<nb; k++)
         tab[k] = rand() % maxValue;
 
