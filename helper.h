@@ -4,6 +4,7 @@
 void benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl);
 void benchmarkd(void (*function)(int*, int, int), int* tab, int nb, int printcsl);
 void afficheTableau(int* tab, int tabSize);
+void afficheTableau10(int* tab, int tabSize);
 int* randTab(int nb, int maxValue);
 
 void writeArrayToFile(char* filename, int *tab, int tabSize);

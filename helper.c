@@ -13,25 +13,31 @@ void afficheTableau(int* tab, int tabSize){
     printf("]\n (%d elements)\n\n", tabSize);
 }
 
+void afficheTableau10(int* tab, int tabSize){
+    if(tabSize < 21){
+        return afficheTableau(tab, tabSize);
+    }
+
+    printf("[");
+    for(int i=0; i<10; i++){
+        printf(" %d,",tab[i]);
+    }
+    printf(" ...,");
+    for(int i=tabSize-10; i<tabSize-1; i++){
+        printf(" %d,",tab[i]);
+    }
+    printf(" %d",tab[tabSize-1]);
+    printf("]\n (%d elements)\n\n", tabSize);
+}
+
 void benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
     if(printcsl)
-        afficheTableau(tab, nb);
+        afficheTableau10(tab, nb);
     float startTime = (float) clock()/CLOCKS_PER_SEC;
     function(tab, nb);
     float endTime = (float) clock()/CLOCKS_PER_SEC;
     if(printcsl)
-        afficheTableau(tab, nb);
-    printf("function took %f seconds\n", (endTime - startTime));
-}
-
-void benchmarkd(void (*function)(int*, int, int), int* tab, int nb, int printcsl){
-    if(printcsl)
-        afficheTableau(tab, nb);
-    float startTime = (float) clock()/CLOCKS_PER_SEC;
-    function(tab, 0, nb);
-    float endTime = (float) clock()/CLOCKS_PER_SEC;
-    if(printcsl)
-        afficheTableau(tab, nb);
+        afficheTableau10(tab, nb);
     printf("function took %f seconds\n", (endTime - startTime));
 }
 

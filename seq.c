@@ -62,16 +62,6 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void afficheSection(int* arr, int start, int end){
-    printf("[");
-    for(int i=start; i<end-1; i++){
-        printf(" %d,",arr[i]);
-    }
-    printf(" %d",arr[end-1]);
-    printf("]\n (%d elements)\n\n", end-start);
-}
-
-
 void fusion(int* U, int n, int* V, int m, int* T){
     int i,j;
     i = 0;
