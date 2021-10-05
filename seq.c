@@ -103,10 +103,8 @@ void fusion(int* U, int n, int* V, int m, int* T){
         }
     }
 
-    printf("nb elements fusion = %d\n",nbElements);
     free(UTemp);
     free(VTemp);
-    
 }
 
 void triFusion(int* T, int n){
@@ -118,13 +116,11 @@ void triFusion(int* T, int n){
     }
     
     int usize = n/2; //10/2 = 5 
-    int* U = copySection(T, 0, usize); /* Copie sur n+1 éléments pour permettre affectation de fonction Fusion */
-    afficheTableau10(U, usize);
+    int* U = copySection(T, 0, usize);
     triFusion(U, usize);
 
     int vsize = n - usize;
-    int* V = copySection(T, usize, vsize); /* Copie sur m+1 éléments pour permettre affectation de fonction Fusion */
-    afficheTableau10(V, vsize);
+    int* V = copySection(T, usize, vsize); 
     triFusion(V, vsize);
     
     fusion(U,usize, V,vsize, T);
