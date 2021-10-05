@@ -4,6 +4,8 @@
 #include "helper.h"
 #include <string.h>
 #include <limits.h>
+#include <time.h>
+
 
 /** Devoir 1 
 - Maxence Decourriere
@@ -12,7 +14,7 @@
 Version séquentielle du tri
  **/
 
-#define SEUIL 115
+#define SEUIL 100
 
 /* Prototypes de fonctions */
 void triFusion(int* T, int n);
@@ -20,20 +22,50 @@ void triInsertion(int* tab, int nbElements);
 
 int thresholdFusionToInsert();
 
+#define NS_PER_SECOND 1000000000
+void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
+{
+    td->tv_nsec = t2.tv_nsec - t1.tv_nsec;
+    td->tv_sec  = t2.tv_sec - t1.tv_sec;
+    if (td->tv_sec > 0 && td->tv_nsec < 0)
+    {
+        td->tv_nsec += NS_PER_SECOND;
+        td->tv_sec--;
+    }
+    else if (td->tv_sec < 0 && td->tv_nsec > 0)
+    {
+        td->tv_nsec -= NS_PER_SECOND;
+        td->tv_sec++;
+    }
+}
+long benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
+    if(printcsl)
+        afficheTableau10(tab, nb);
+        
+    struct timespec start, finish, delta;
+   
+    clock_gettime(CLOCK_REALTIME, &start);
+
+    function(tab, nb);
+    
+    clock_gettime(CLOCK_REALTIME, &finish);
+    sub_timespec(start, finish, &delta);
+   
+    if(printcsl)
+        afficheTableau10(tab, nb);
+        
+    printf("function took %d.%.9ld seconds\n", (int)delta.tv_sec, delta.tv_nsec);
+
+    return (long)delta.tv_sec*NS_PER_SECOND + (long)delta.tv_nsec;
+}
+
+
 int main(int argc, char* argv[]){ 
     int tailleTableau;
     int nbElements;
     char* filename;
     int* fArray;
-    /*
-    float sum;
-    for(int i=0; i<1000; i++){
-        sum += thresholdFusionToInsert();
-    }
-    printf("seuil moyenne %f\n", sum/1000.0f);
-    */
     
-
     if(argc < 3 ){
         puts("Utilisation : fusion/insert <nom de fichier> (-p (optionnel : print to console))");
         puts("Autre possibilite : utiliser l'argument gen <nb_elements> <nom_fichier>\n");
@@ -150,13 +182,13 @@ int thresholdFusionToInsert(){
     do{
         nbIteration++;
         tab1 = randTab(nbIteration, 10000);
-        tab2 = copySection(tab1,0,nbIteration);
+        tab2 = dupliqueSection(tab1,0,nbIteration);
         benchInsert = benchmark(triInsertion, tab1, nbIteration, 0);
         benchFusion = benchmark(triFusion, tab2, nbIteration, 0);
         free(tab1);
         free(tab2);
     
     }while( benchFusion > benchInsert );
-    //printf("seuil est %d \n",nbIteration);
+    printf("seuil est %d \n",nbIteration);
     return nbIteration;
 }

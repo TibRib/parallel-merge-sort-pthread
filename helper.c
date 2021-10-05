@@ -6,7 +6,7 @@
 
 #include "helper.h"
 
-#define NS_PER_SECOND 1000000000
+
 
 void afficheTableau(int* tab, int tabSize){
     printf("[");
@@ -36,43 +36,8 @@ void afficheTableau10(int* tab, int tabSize){
     printf("]\n (%d elements)\n\n", tabSize);
 }
 
-void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
-{
-    td->tv_nsec = t2.tv_nsec - t1.tv_nsec;
-    td->tv_sec  = t2.tv_sec - t1.tv_sec;
-    if (td->tv_sec > 0 && td->tv_nsec < 0)
-    {
-        td->tv_nsec += NS_PER_SECOND;
-        td->tv_sec--;
-    }
-    else if (td->tv_sec < 0 && td->tv_nsec > 0)
-    {
-        td->tv_nsec -= NS_PER_SECOND;
-        td->tv_sec++;
-    }
-}
 
 
-long benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
-    if(printcsl)
-        afficheTableau10(tab, nb);
-        
-    struct timespec start, finish, delta;
-   
-    clock_gettime(CLOCK_REALTIME, &start);
-
-    function(tab, nb);
-    
-    clock_gettime(CLOCK_REALTIME, &finish);
-    sub_timespec(start, finish, &delta);
-   
-    if(printcsl)
-        afficheTableau10(tab, nb);
-        
-    printf("function took %d.%.9ld seconds\n", (int)delta.tv_sec, delta.tv_nsec);
-
-    return (long)delta.tv_sec*NS_PER_SECOND + (long)delta.tv_nsec;
-}
 
 int* randTab(int nb, int maxValue){
     int *tab;
@@ -89,13 +54,18 @@ int *alloueTableau(int nbElements){
     return (int*) malloc(sizeof(int)*nbElements);
 }
 
-int* copySection(int* tableau, int startIndex, int nb){
-    /*
+//Alloue et duplique la mémoire interne d'un tableau
+int* dupliqueSection(int* tableau, int startIndex, int nb){
     int* tab = alloueTableau(nb);
     int i;
     for(i=0; i<nb; i++){
         tab[i] = tableau[startIndex + i];
-    }*/
+    }
+    return tab;
+}
+
+//Arithmétique de pointeurs sans allocations
+int* copySection(int* tableau, int startIndex, int nb){
     return tableau + startIndex;
 }
 

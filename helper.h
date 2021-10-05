@@ -1,7 +1,6 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-long benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl);
 void afficheTableau(int* tab, int tabSize);
 void afficheTableau10(int* tab, int tabSize);
 int* randTab(int nb, int maxValue);
@@ -11,5 +10,7 @@ int* loadArrayFromFile(char* filename, int *nbElements);
 
 int *alloueTableau(int nbElements);
 int* copySection(int* tableau, int startIndex, int nb);
+int* dupliqueSection(int* tableau, int startIndex, int nb);
+
 
 #endif

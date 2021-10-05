@@ -6,6 +6,7 @@
 #include <limits.h>
 
 #include <pthread.h>
+#include <time.h>
 
 /** Devoir 1 
 - Maxence Decourriere
@@ -24,25 +25,163 @@ typedef struct array{
 #define NUM_THREADS 1
 
 /* Prototypes de fonctions */
-//void triFusion(int* T, int n);
+void* triFusion(void * args);
 void* triInsertion(void * arg);
 
 void triSegmente(int* tableau, int nbElements);
 
-int main(int argc, char *argv[])
+#define NS_PER_SECOND 1000000000
+void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
 {
-    int tabSize;
-    int* tab = loadArrayFromFile("tab_200k.bin", &tabSize);
-    printf("tableau de %d elements chargé.\n",tabSize);
-    afficheTableau10(tab,tabSize);
+    td->tv_nsec = t2.tv_nsec - t1.tv_nsec;
+    td->tv_sec  = t2.tv_sec - t1.tv_sec;
+    if (td->tv_sec > 0 && td->tv_nsec < 0)
+    {
+        td->tv_nsec += NS_PER_SECOND;
+        td->tv_sec--;
+    }
+    else if (td->tv_sec < 0 && td->tv_nsec > 0)
+    {
+        td->tv_nsec -= NS_PER_SECOND;
+        td->tv_sec++;
+    }
+}
+long benchmark(void* (*function)(void*), array* tab, int printcsl){
+    if(printcsl)
+        afficheTableau10(tab->el, tab->size);
+        
+    struct timespec start, finish, delta;
+   
+    clock_gettime(CLOCK_REALTIME, &start);
 
-    printf("benchmark sur %d threads.\n",NUM_THREADS);
-    benchmark(triSegmente, tab, tabSize, 0);
-    afficheTableau10(tab,tabSize);
+    function((void*)tab);
+    
+    clock_gettime(CLOCK_REALTIME, &finish);
+    sub_timespec(start, finish, &delta);
+   
+    if(printcsl)
+        afficheTableau10(tab->el, tab->size);
+        
+    printf("function took %d.%.9ld seconds\n", (int)delta.tv_sec, delta.tv_nsec);
 
-    free(tab);
+    return (long)delta.tv_sec*NS_PER_SECOND + (long)delta.tv_nsec;
 }
 
+
+
+int main(int argc, char *argv[])
+{
+    int nbElements;
+    char* filename;
+    array fArray;
+    
+    if(argc < 3 ){
+        puts("Utilisation : fusion/insert <nom de fichier> (-p (optionnel : print to console))");
+        puts("Autre possibilite : utiliser l'argument gen <nb_elements> <nom_fichier>\n");
+        exit(1);
+    }
+
+    if(strcmp(argv[1],"gen") == 0){
+        if(argc != 4){
+              puts("Entrez un nom de fichier valide.\n ex: ./seq gen 376 nom_fichier.bin\n");
+            return(1);
+        }
+        nbElements = atoi(argv[2]);
+        if(nbElements < 1){
+            puts("Entrez un nombre d'elements valide.\n ex: ./seq gen 376 tab_376.bin\n");
+            return(1);
+        }
+        
+        filename = argv[3];
+        fArray.el = randTab(nbElements, 10000);
+        fArray.size = nbElements;
+        writeArrayToFile(filename, fArray.el, nbElements);
+        printf("Tableau enregistré dans le fichier '%s'\n",filename);
+        free(fArray.el);
+    }
+    else{
+        char* tri = argv[1];
+        char* filename = argv[2];
+        int printArg = (argc>3)? !strcmp(argv[3], "-p") : 0;
+
+        fArray.el = loadArrayFromFile(filename,&(fArray.size));
+
+        if(strcmp(tri,"insert") == 0){
+            benchmark(triInsertion, &fArray, printArg);
+        } else if(strcmp(tri,"fusion") == 0){
+            benchmark(triFusion, &fArray, printArg);
+        } else{
+            puts("Entrer un type de tri valide : insert   ou   fusion");
+        }
+        free(fArray.el);
+    }
+    
+    return 0;
+}
+
+
+void fusion(int* U, int n, int* V, int m, int* T){
+    int i,j,k;
+
+    int nbElements = m+n;
+
+    int* UTemp = alloueTableau(n+1);
+    for(i=0; i<n; i++) UTemp[i] = U[i];
+    UTemp[n] = INT_MAX;
+
+    int* VTemp = alloueTableau(m+1);
+    for(i=0; i<m; i++) VTemp[i] = V[i];
+    VTemp[m] = INT_MAX;
+
+    i = 0;
+    j = 0;
+    k = 0;
+    
+    for(k=0; k < nbElements; k++){
+        if(UTemp[i] < VTemp[j]){
+            T[k] = UTemp[i++]; 
+        }
+        else{
+            T[k] = VTemp[j++];
+        }
+    }
+
+    free(UTemp);
+    free(VTemp);
+}
+
+void* triFusion(void* args){
+    array arr = *(array*)args;
+    int *T = arr.el;
+    int n = arr.size;
+    if(n < 2){
+        return NULL;
+    }
+    else if(n < SEUIL){
+        return triInsertion(args);
+    }
+    
+    /* Section parallele 1 */
+    pthread_t uThread;
+    int usize = n/2;
+    int* U = copySection(T, 0, usize);
+    array uArray = {U, usize};
+    pthread_create(&uThread, NULL, triFusion, (void*)&uArray);
+
+    /* Section parallele 2 */
+    pthread_t vThread;
+    int vsize = n - usize;
+    int* V = copySection(T, usize, vsize);
+    array vArray = {V, vsize};
+    pthread_create(&vThread, NULL, triFusion, (void*)&vArray);
+
+    /* Jointure */
+    pthread_join(uThread, NULL);
+    pthread_join(vThread, NULL);
+    fusion(U,usize, V,vsize, T);
+
+    return NULL;
+}
 
 void* triInsertion(void* args){
     array tab = *(array*)args;
@@ -86,7 +225,5 @@ void triSegmente(int* tableau, int nbElements){
         /* Fin parallélisation */
         pthread_join(tabThreads[i], NULL);
     }
-    pthread_t final;
-    pthread_create(&final, NULL, triInsertion, (void*)&tab);
-    pthread_join(final, NULL);
+    triInsertion((void*)&tab);
 }
