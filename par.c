@@ -20,8 +20,6 @@ typedef struct array{
     int size;
 }array;
 
-int nbThreads = 0;
-
 #define SEUIL 100
 
 #define NUM_THREADS 4
