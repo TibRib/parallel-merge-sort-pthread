@@ -20,13 +20,16 @@ typedef struct array{
     int size;
 }array;
 
-#define SEUIL 115
+int nbThreads = 0;
 
-#define NUM_THREADS 1
+#define SEUIL 100
+
+#define NUM_THREADS 4
 
 /* Prototypes de fonctions */
 void* triFusion(void * args);
 void* triInsertion(void * arg);
+void* launchFusion(void * arg);
 
 void triSegmente(int* tableau, int nbElements);
 
@@ -74,6 +77,8 @@ int main(int argc, char *argv[])
     int nbElements;
     char* filename;
     array fArray;
+
+    printf("%d Threads utilisés.\n",NUM_THREADS);
     
     if(argc < 3 ){
         puts("Utilisation : fusion/insert <nom de fichier> (-p (optionnel : print to console))");
@@ -109,7 +114,7 @@ int main(int argc, char *argv[])
         if(strcmp(tri,"insert") == 0){
             benchmark(triInsertion, &fArray, printArg);
         } else if(strcmp(tri,"fusion") == 0){
-            benchmark(triFusion, &fArray, printArg);
+            benchmark(launchFusion, &fArray, printArg);
         } else{
             puts("Entrer un type de tri valide : insert   ou   fusion");
         }
@@ -150,6 +155,45 @@ void fusion(int* U, int n, int* V, int m, int* T){
     free(VTemp);
 }
 
+void* launchFusion(void *args){
+    array tab = *(array*)args;
+    
+    int nbPerTable = (tab.size/NUM_THREADS);
+    int nbLastTab = tab.size - (NUM_THREADS-1)*nbPerTable;
+
+    array tabs[NUM_THREADS];
+    pthread_t tabThreads[NUM_THREADS];
+
+    for(int i=0; i< NUM_THREADS - 1; i++){
+        int start = i*nbPerTable;
+        tabs[i].el = tab.el + start;
+        tabs[i].size = nbPerTable;
+    }
+    tabs[NUM_THREADS-1].el = tab.el+(NUM_THREADS-1)*nbPerTable;
+    tabs[NUM_THREADS-1].size= nbLastTab;
+
+    /* Trier portions de tableaux */
+    for(int i=0; i< NUM_THREADS; i++){
+        /* Lancer parallélisation */
+        pthread_create(&tabThreads[i], NULL, triFusion, (void*)&tabs[i]);
+    }
+    for(int i=0; i< NUM_THREADS; i++){
+        /* Fin parallélisation */
+        pthread_join(tabThreads[i], NULL);
+    }
+    printf("Fusion\n");
+    //tabs[0], tabs[1], tabs[2], tabs[3]
+
+    fusion(tabs[0].el, tabs[0].size, tabs[1].el, tabs[1].size, tab.el);
+    fusion(tabs[2].el, tabs[2].size, tabs[3].el, tabs[3].size, tab.el);
+    int* g1 = copySection(tab.el, 0, tab.size/2);
+    int* g2 = copySection(tab.el, tab.size/2, tab.size/2);
+    fusion(g1, tab.size/2, g2, tab.size/2, tab.el);
+
+
+    return NULL;
+}
+
 void* triFusion(void* args){
     array arr = *(array*)args;
     int *T = arr.el;
@@ -162,22 +206,24 @@ void* triFusion(void* args){
     }
     
     /* Section parallele 1 */
-    pthread_t uThread;
     int usize = n/2;
     int* U = copySection(T, 0, usize);
     array uArray = {U, usize};
-    pthread_create(&uThread, NULL, triFusion, (void*)&uArray);
+    triFusion( (void*)&uArray);
+    //pthread_t uThread;
+    //pthread_create(&uThread, NULL, triFusion, (void*)&uArray);
 
     /* Section parallele 2 */
-    pthread_t vThread;
     int vsize = n - usize;
     int* V = copySection(T, usize, vsize);
     array vArray = {V, vsize};
-    pthread_create(&vThread, NULL, triFusion, (void*)&vArray);
+    triFusion( (void*)&vArray);
+    //pthread_t vThread;
+    //pthread_create(&vThread, NULL, triFusion, (void*)&vArray);
 
     /* Jointure */
-    pthread_join(uThread, NULL);
-    pthread_join(vThread, NULL);
+    //pthread_join(uThread, NULL);
+    //pthread_join(vThread, NULL);
     fusion(U,usize, V,vsize, T);
 
     return NULL;

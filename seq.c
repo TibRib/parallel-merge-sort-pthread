@@ -14,7 +14,7 @@
 Version séquentielle du tri
  **/
 
-#define SEUIL 100
+#define SEUIL 1
 
 /* Prototypes de fonctions */
 void triFusion(int* T, int n);
