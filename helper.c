@@ -53,7 +53,7 @@ void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
 }
 
 
-double benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
+long benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
     if(printcsl)
         afficheTableau10(tab, nb);
         
@@ -71,7 +71,7 @@ double benchmark(void (*function)(int*, int), int* tab, int nb, int printcsl){
         
     printf("function took %d.%.9ld seconds\n", (int)delta.tv_sec, delta.tv_nsec);
 
-    return delta.tv_nsec;
+    return (long)delta.tv_sec*NS_PER_SECOND + (long)delta.tv_nsec;
 }
 
 int* randTab(int nb, int maxValue){

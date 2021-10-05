@@ -12,19 +12,27 @@
 Version séquentielle du tri
  **/
 
-#define SEUIL 150
+#define SEUIL 115
 
 /* Prototypes de fonctions */
 void triFusion(int* T, int n);
 void triInsertion(int* tab, int nbElements);
 
-//void thresholdFusionToInsert(int nb, int printcsl);
+int thresholdFusionToInsert();
 
 int main(int argc, char* argv[]){ 
     int tailleTableau;
     int nbElements;
     char* filename;
     int* fArray;
+    /*
+    float sum;
+    for(int i=0; i<1000; i++){
+        sum += thresholdFusionToInsert();
+    }
+    printf("seuil moyenne %f\n", sum/1000.0f);
+    */
+    
 
     if(argc < 3 ){
         puts("Utilisation : fusion/insert <nom de fichier> (-p (optionnel : print to console))");
@@ -60,14 +68,12 @@ int main(int argc, char* argv[]){
             benchmark(triInsertion, fArray, tailleTableau, printArg);
         } else if(strcmp(tri,"fusion") == 0){
             benchmark(triFusion, fArray, tailleTableau, printArg);
-        } /* else if(strcmp(tri,"threshold") == 0){
-            thresholdFusionToInsert(tailleTableau, printArg);
-        } */ else{
+        } else{
             puts("Entrer un type de tri valide : insert   ou   fusion");
         }
         free(fArray);
     }
-
+    
     return 0;
 }
 
@@ -112,6 +118,7 @@ void triFusion(int* T, int n){
     triFusion(V, vsize);
     
     fusion(U,usize,V,vsize, T);
+   // free(U); free(V);
 }
 
 
@@ -129,21 +136,23 @@ void triInsertion(int* tab, int nbElements){
     return;
 }
 
-/*
-void thresholdFusionToInsert( int nb, int printcsl){
-    int nbIteration = 0;
-    double benchInsert;
-    double benchFusion;
-    int* tab;
+
+int thresholdFusionToInsert(){
+    int nbIteration = 10;
+    long benchInsert;
+    long benchFusion;
+    int *tab1, *tab2;
 
     do{
         nbIteration++;
-        tab = randTab(nbIteration, 10000);
-        benchInsert = benchmark(triInsertion, tab, nbIteration, printcsl);
-        benchFusion = benchmark(triFusion, tab, nbIteration, printcsl);
-        free(tab);
+        tab1 = randTab(nbIteration, 10000);
+        tab2 = copySection(tab1,0,nbIteration);
+        benchInsert = benchmark(triInsertion, tab1, nbIteration, 0);
+        benchFusion = benchmark(triFusion, tab2, nbIteration, 0);
+        free(tab1);
+        free(tab2);
     
-    }while( ( (fabs(benchInsert - benchFusion) / ( (benchInsert - benchFusion)/2.0 )) * 100) > (float)nb );
-    printf("%d elements",nbIteration);
+    }while( benchFusion > benchInsert );
+    //printf("seuil est %d \n",nbIteration);
+    return nbIteration;
 }
-*/
