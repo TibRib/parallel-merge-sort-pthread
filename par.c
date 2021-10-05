@@ -157,6 +157,7 @@ void fusion(int* U, int n, int* V, int m, int* T){
 
 void* launchFusion(void *args){
     array tab = *(array*)args;
+    int i;
     
     int nbPerTable = (tab.size/NUM_THREADS);
     int nbLastTab = tab.size - (NUM_THREADS-1)*nbPerTable;
@@ -164,7 +165,7 @@ void* launchFusion(void *args){
     array tabs[NUM_THREADS];
     pthread_t tabThreads[NUM_THREADS];
 
-    for(int i=0; i< NUM_THREADS - 1; i++){
+    for(i=0; i< NUM_THREADS - 1; i++){
         int start = i*nbPerTable;
         tabs[i].el = tab.el + start;
         tabs[i].size = nbPerTable;
@@ -173,26 +174,43 @@ void* launchFusion(void *args){
     tabs[NUM_THREADS-1].size= nbLastTab;
 
     /* Trier portions de tableaux */
-    for(int i=0; i< NUM_THREADS; i++){
+    for(i=0; i< NUM_THREADS; i++){
         /* Lancer parallélisation */
         pthread_create(&tabThreads[i], NULL, triFusion, (void*)&tabs[i]);
     }
-    for(int i=0; i< NUM_THREADS; i++){
+    for(i=0; i< NUM_THREADS; i++){
         /* Fin parallélisation */
         pthread_join(tabThreads[i], NULL);
     }
-    printf("Fusion\n");
-    //tabs[0], tabs[1], tabs[2], tabs[3]
 
-    fusion(tabs[0].el, tabs[0].size, tabs[1].el, tabs[1].size, tab.el);
-    fusion(tabs[2].el, tabs[2].size, tabs[3].el, tabs[3].size, tab.el);
-    int* g1 = copySection(tab.el, 0, tab.size/2);
-    int* g2 = copySection(tab.el, tab.size/2, tab.size/2);
-    fusion(g1, tab.size/2, g2, tab.size/2, tab.el);
+    array aFusionner[NUM_THREADS];
+    for (i = 0; i < NUM_THREADS; i++)
+    {
+        aFusionner[i] = tabs[i];
+    }
 
+    int nbAFusionner = NUM_THREADS;
+    int b = 0;
+
+    while (nbAFusionner > 1)
+    {
+        int cpt=0;
+        int lastIndex=0;
+        for(b=0; b<nbAFusionner-1; b+=2){
+            fusion(aFusionner[b].el, aFusionner[b].size, aFusionner[b+1].el, aFusionner[b+1].size, aFusionner[b].el);
+            int size = aFusionner[b].size + aFusionner[b+1].size;
+            
+            array bufferFusion = { copySection(tab.el, lastIndex, size), size};
+            lastIndex += size;
+            aFusionner[cpt] = bufferFusion;
+            cpt++;
+        }
+        nbAFusionner = nbAFusionner >> 1;
+    }
 
     return NULL;
 }
+
 
 void* triFusion(void* args){
     array arr = *(array*)args;
