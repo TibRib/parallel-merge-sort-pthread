@@ -1,17 +1,17 @@
-par: par.o helper.o
-	gcc -o par par.o helper.o -lpthread
+d1p: d1p.o
+	gcc -o d1p d1p.o  -lpthread
 
-par.o: par.c helper.h
-	gcc -c -Wall par.c -lpthread
+d1p.o: d1p.c
+	gcc -c -Wall d1p.c -lpthread
 
-seq: seq.o helper.o
-	gcc -o seq seq.o helper.o
+d1s: d1s.o 
+	gcc -o d1s d1s.o
 
-seq.o: seq.c helper.h
-	gcc -c -Wall seq.c
-
-helper.o: helper.c helper.h
-	gcc -c -Wall helper.c
+d1s.o: d1s.c 
+	gcc -c -Wall d1s.c
 
 clean:
 	rm *.o
+
+all: d1p d1s
+	echo "ok";
