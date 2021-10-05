@@ -78,25 +78,35 @@ int main(int argc, char* argv[]){
 }
 
 void fusion(int* U, int n, int* V, int m, int* T){
-    int i,j;
-    i = 0;
-    j = 0;
+    int i,j,k;
 
     int nbElements = m+n;
 
-    U[n+1] = INT_MAX;
-    V[n+1] = INT_MAX;
+    int* UTemp = alloueTableau(n+1);
+    for(i=0; i<n; i++) UTemp[i] = U[i];
+    UTemp[n] = INT_MAX;
 
-    int k;
+    int* VTemp = alloueTableau(m+1);
+    for(i=0; i<m; i++) VTemp[i] = V[i];
+    VTemp[m] = INT_MAX;
+
+    i = 0;
+    j = 0;
+    k = 0;
+    
     for(k=0; k < nbElements; k++){
-        if(U[i] < V[j]){
-            T[k] = U[i++]; 
+        if(UTemp[i] < VTemp[j]){
+            T[k] = UTemp[i++]; 
         }
         else{
-            T[k] = V[j++];
+            T[k] = VTemp[j++];
         }
-
     }
+
+    printf("nb elements fusion = %d\n",nbElements);
+    free(UTemp);
+    free(VTemp);
+    
 }
 
 void triFusion(int* T, int n){
@@ -107,20 +117,18 @@ void triFusion(int* T, int n){
         return triInsertion(T,n);
     }
     
-    int mid = n/2;
-
-    int usize = mid;
-    int* U = copySection(T, 0, usize+1); /* Copie sur n+1 éléments pour permettre affectation de fonction Fusion */
+    int usize = n/2; //10/2 = 5 
+    int* U = copySection(T, 0, usize); /* Copie sur n+1 éléments pour permettre affectation de fonction Fusion */
+    afficheTableau10(U, usize);
     triFusion(U, usize);
 
-    int vsize = n-mid;
-    int* V = copySection(T, mid, vsize+1); /* Copie sur m+1 éléments pour permettre affectation de fonction Fusion */
+    int vsize = n - usize;
+    int* V = copySection(T, usize, vsize); /* Copie sur m+1 éléments pour permettre affectation de fonction Fusion */
+    afficheTableau10(V, vsize);
     triFusion(V, vsize);
     
-    fusion(U,usize,V,vsize, T);
-   // free(U); free(V);
+    fusion(U,usize, V,vsize, T);
 }
-
 
 void triInsertion(int* tab, int nbElements){
     int i, j, clef;

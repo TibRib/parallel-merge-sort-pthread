@@ -90,12 +90,13 @@ int *alloueTableau(int nbElements){
 }
 
 int* copySection(int* tableau, int startIndex, int nb){
+    /*
     int* tab = alloueTableau(nb);
     int i;
     for(i=0; i<nb; i++){
         tab[i] = tableau[startIndex + i];
-    }
-    return tab;
+    }*/
+    return tableau + startIndex;
 }
 
 void writeArrayToFile(char* filename, int *tab, int tabSize){
